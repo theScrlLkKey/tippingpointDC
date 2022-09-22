@@ -8,6 +8,14 @@
 /*----------------------------------------------------------------------------*/
 
 // ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller                    
+// LEFT_FR              motor         9               
+// LEFT_BK              motor         19              
+// RIGHT_FR             motor         10              
+// RIGHT_BK             motor         18              
+// SPIN                 motor         12              
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
@@ -28,6 +36,108 @@ competition Competition;
 /*  function is only called once after the V5 has been powered on and        */
 /*  not every time that the robot is disabled.                               */
 /*---------------------------------------------------------------------------*/
+
+
+//manual drivetrain implementation
+class Drivetrain {
+  int horizontalVelocity = 70;
+  //fr = front right drivetrain moter power in %
+  //fl = front left drivetrain moter power in %
+  //br = back right drivetrain moter power in %
+  //bl = back left drivetrain moter power in %
+
+  public: int fl;
+  public: int fr;
+  public: int bl;
+  public: int br;
+  public: bool sidewaysPressed;
+
+
+  public: void horizontal(bool left, bool right){
+ //move left
+    if (left){
+      sidewaysPressed=true;
+      fr = -horizontalVelocity;
+      br =  horizontalVelocity;
+
+      fl =  horizontalVelocity;
+      bl = -horizontalVelocity;
+
+      //move right
+    } else if (right){
+      sidewaysPressed=true;
+      fr =  horizontalVelocity;
+      br = -horizontalVelocity;
+
+      fl = -horizontalVelocity;
+      bl =  horizontalVelocity;
+
+    }
+  }
+  public: void stickMove(float LeftStick, float RightStick){
+  //move based of stick if stick is pressed
+    if (LeftStick != 0 || RightStick != 0){
+      //mix horizontal and stick
+      if (sidewaysPressed) {
+        fr *=0.5;
+        br *=0.5;
+        fl *=0.5;
+        bl *=0.5;
+
+        fl+=LeftStick*0.5;
+        bl+=LeftStick*0.5;
+
+        fr+=RightStick*0.5;
+        br+=RightStick*0.5;
+        //full stick
+      } else {
+        fl+=LeftStick;
+        bl+=LeftStick;
+
+        fr+=RightStick;
+        br+=RightStick; 
+
+      }
+    }
+    
+  }
+  
+  //spin drivetrain motors based of internal power variables
+  public: void drive(){
+      RIGHT_FR.setVelocity(-fr, percent);
+      RIGHT_BK.setVelocity(-br, percent);
+      LEFT_FR.setVelocity(fl, percent);
+      LEFT_BK.setVelocity(bl, percent);
+
+      LEFT_FR.spin(forward);
+      LEFT_BK.spin(forward);
+      RIGHT_FR.spin(forward);
+      RIGHT_BK.spin(forward);
+  }
+
+  //resets power vars to 0 and resets sideways bool
+  public: void reset(){
+    sidewaysPressed = false;
+    fl = 0;
+    fr = 0;
+    bl = 0;
+    br = 0;
+  }
+};
+
+void SPINNER(bool clockwise, bool counterclockwise) {
+    switch(clockwise-counterclockwise) {
+      case -1:
+        SPIN.spin(forward);
+        break;
+      case 0:
+        SPIN.stop();
+        break;
+      case 1:
+        SPIN.spin(reverse);
+        break;
+    }
+}
 
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
@@ -64,20 +174,28 @@ void autonomous(void) {
 /*---------------------------------------------------------------------------*/
 
 void usercontrol(void) {
-  // User control code here, inside the loop
+  //initalize drivetrain labeled as "d" and set velocities to 0
+  Drivetrain d;
+  d.reset();
+  //set inital Spin power
+  SPIN.setVelocity(60, percent);
+
+  //core user input loop
   while (1) {
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo
-    // values based on feedback from the joysticks.
+    //spinner logic
+    SPINNER(Controller1.ButtonR1.pressing(), Controller1.ButtonL1.pressing());
 
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to
-    // update your motors, etc.
-    // ........................................................................
+    //resets motor velocities
+    d.reset();
 
-    wait(20, msec); // Sleep the task for a short amount of time to
-                    // prevent wasted resources.
-  }
+    d.horizontal(Controller1.ButtonL2.pressing(), Controller1.ButtonR2.pressing());
+    d.stickMove(Controller1.Axis3.position(), Controller1.Axis2.position());
+
+    
+    //send drivetrain velocities to motors
+    d.drive();
+    wait(20, msec);
+    }
 }
 
 //
@@ -96,3 +214,5 @@ int main() {
     wait(100, msec);
   }
 }
+
+
