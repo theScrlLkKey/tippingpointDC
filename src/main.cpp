@@ -126,10 +126,10 @@ class Drivetrain {
 
 void SPINNER(bool clockwise, Drivetrain *dr) {
     if(clockwise) {
-      dr->fr = -8;
+      dr->fr = 2;
       dr->fl = -8;
       dr->bl = -8;
-      dr->br = -8;
+      dr->br = 2;
       SPIN.spin(reverse);
   } else {
       SPIN.stop();
