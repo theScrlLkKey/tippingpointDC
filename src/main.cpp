@@ -37,7 +37,6 @@ competition Competition;
 /*  not every time that the robot is disabled.                               */
 /*---------------------------------------------------------------------------*/
 
-// test comment
 //manual drivetrain implementation
 class Drivetrain {
   int horizontalVelocity = 70;
@@ -125,17 +124,17 @@ class Drivetrain {
   }
 };
 
-void SPINNER(bool clockwise, bool counterclockwise) {
-    switch(clockwise-counterclockwise) {
-      case -1:
-        SPIN.spin(forward);
-        break;
-      case 0:
-        SPIN.stop();
-        break;
-      case 1:
-        SPIN.spin(reverse);
-        break;
+void SPINNER(bool clockwise, Drivetrain dr) {
+    if(clockwise) {
+      dr.reset();
+      dr.fr = 8;
+      dr.fl = 8;
+      dr.bl = 8;
+      dr.br = 8;
+      dr.drive();
+      SPIN.spin(reverse);
+  } else {
+      SPIN.stop();
     }
 }
 
@@ -183,7 +182,7 @@ void usercontrol(void) {
   //core user input loop
   while (1) {
     //spinner logic
-    SPINNER(Controller1.ButtonR1.pressing(), Controller1.ButtonL1.pressing());
+    SPINNER(Controller1.ButtonR1.pressing(), d);
 
     //resets motor velocities
     d.reset();
