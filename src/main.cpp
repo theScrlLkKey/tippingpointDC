@@ -124,14 +124,12 @@ class Drivetrain {
   }
 };
 
-void SPINNER(bool clockwise, Drivetrain dr) {
+void SPINNER(bool clockwise, Drivetrain *dr) {
     if(clockwise) {
-      dr.reset();
-      dr.fr = 8;
-      dr.fl = 8;
-      dr.bl = 8;
-      dr.br = 8;
-      dr.drive();
+      dr->fr = -8;
+      dr->fl = -8;
+      dr->bl = -8;
+      dr->br = -8;
       SPIN.spin(reverse);
   } else {
       SPIN.stop();
@@ -182,7 +180,6 @@ void usercontrol(void) {
   //core user input loop
   while (1) {
     //spinner logic
-    SPINNER(Controller1.ButtonR1.pressing(), d);
 
     //resets motor velocities
     d.reset();
@@ -190,7 +187,10 @@ void usercontrol(void) {
     d.horizontal(Controller1.ButtonL2.pressing(), Controller1.ButtonR2.pressing());
     d.stickMove(Controller1.Axis3.position(), Controller1.Axis2.position());
 
-    
+    Drivetrain* f = &d;
+    SPINNER(Controller1.ButtonX.pressing(), f);
+    Controller1.Screen.newLine();
+    Controller1.Screen.print(":D");
     //send drivetrain velocities to motors
     d.drive();
     wait(20, msec);
