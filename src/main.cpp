@@ -124,15 +124,14 @@ class Drivetrain {
   }
 };
 
-void SPINNER(bool clockwise, Drivetrain *dr) {
-    if(clockwise) {
+void SPINNER(bool rotate, directionType dir, Drivetrain *dr) {
+    if(rotate) {
+      //drive backwords to apply force
       dr->fr = 2;
       dr->fl = -8;
       dr->bl = -8;
       dr->br = 2;
-      SPIN.spin(reverse);
-  } else {
-      SPIN.stop();
+      SPIN.spin(dir);
     }
 }
 
@@ -175,22 +174,25 @@ void usercontrol(void) {
   Drivetrain d;
   d.reset();
   //set inital Spin power
-  SPIN.setVelocity(60, percent);
+  SPIN.setVelocity(40, percent);
 
   //core user input loop
   while (1) {
-    //spinner logic
-
+    //stop spinner
+    SPIN.stop();
     //resets motor velocities
     d.reset();
 
+    //strafe on triggers
     d.horizontal(Controller1.ButtonL2.pressing(), Controller1.ButtonR2.pressing());
+    //move based of sticks
     d.stickMove(Controller1.Axis3.position(), Controller1.Axis2.position());
 
-    Drivetrain* f = &d;
-    SPINNER(Controller1.ButtonX.pressing(), f);
-    Controller1.Screen.newLine();
-    Controller1.Screen.print(":D");
+    //pointer to drivetrain
+    Drivetrain* dr1 = &d;
+    //spin based off bumpers
+    SPINNER(Controller1.ButtonL1.pressing(), forward, dr1);
+    SPINNER(Controller1.ButtonR1.pressing(), reverse, dr1);
     //send drivetrain velocities to motors
     d.drive();
     wait(20, msec);
