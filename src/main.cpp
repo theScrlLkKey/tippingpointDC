@@ -19,6 +19,7 @@
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
+#include<math.h>
 
 using namespace vex;
 
@@ -56,20 +57,20 @@ class Drivetrain {
  //move left
     if (left){
       sidewaysPressed=true;
-      fr = -horizontalVelocity;
-      br =  horizontalVelocity;
-
-      fl =  horizontalVelocity;
-      bl = -horizontalVelocity;
-
-      //move right
-    } else if (right){
-      sidewaysPressed=true;
       fr =  horizontalVelocity;
       br = -horizontalVelocity;
 
       fl = -horizontalVelocity;
       bl =  horizontalVelocity;
+
+      //move right
+    } else if (right){
+      sidewaysPressed=true;
+      fr = -horizontalVelocity;
+      br =  horizontalVelocity;
+
+      fl =  horizontalVelocity;
+      bl = -horizontalVelocity;
 
     }
   }
@@ -98,7 +99,17 @@ class Drivetrain {
 
       }
     }
-    
+  }
+
+  public: void AutonomousDrive(float left, float right, double t){
+      fl = left;
+      fl = left;
+
+      br = right;
+      fr = right;
+      this->drive();
+
+     
   }
   
   //spin drivetrain motors based of internal power variables
@@ -127,47 +138,74 @@ class Drivetrain {
 void SPINNER(bool rotate, directionType dir, Drivetrain *dr) {
     if(rotate) {
       //drive backwords to apply force
-      dr->fr = 2;
+      dr->fr = -2;
+      dr->br = -2;
+
       dr->fl = -8;
       dr->bl = -8;
-      dr->br = 2;
       SPIN.spin(dir);
     }
 }
+enum SpoolState{
+  Stopped,
+  Unspooling,
+  Spooling,
+};
+
+class Spool {
+  SpoolState spinning = Stopped;
+  directionType dir = forward;
+  public: Drivetrain *d;
+
+  public: void unwind(bool unwind){
+    if (unwind)
+    {
+      spinning = Unspooling;
+      dir = forward;
+    }
+  }
+
+  public: void wind(bool wind){
+    if (wind){
+      spinning = Spooling;
+      SPOOL.spin(reverse);
+    } else if (spinning == Spooling) {
+      spinning = Stopped;
+    }
+  }
+  public: void update(){
+    if (spinning == Unspooling) {
+      SPOOL.spin(dir);
+      d->fr = d->fr/3;
+      d->br = d->br/3;
+      d->fl = d->fl/3;
+      d->bl = d->bl/3;
+    } else if (spinning == Stopped) {
+      SPOOL.stop();
+    }
+  }
+
+};
 
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
 
+
+
+
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
 }
 
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              Autonomous Task                              */
-/*                                                                           */
-/*  This task is used to control your robot during the autonomous phase of   */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
-
 void autonomous(void) {
-  // ..........................................................................
-  // Insert autonomous user code here.
-  // ..........................................................................
+  SPIN.setVelocity(40, percent);
+  Drivetrain d;
+  d.reset();
+  d.AutonomousDrive(40, 40, 1);
+  SPINNER(true, forward, &d);
+  wait(0.3, sec);
 }
-
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              User Control Task                            */
-/*                                                                           */
-/*  This task is used to control your robot during the user control phase of */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
 
 void usercontrol(void) {
   //initalize drivetrain labeled as "d" and set velocities to 0
@@ -176,10 +214,17 @@ void usercontrol(void) {
   //set inital Spin power
   SPIN.setVelocity(40, percent);
 
+
+  int string_velocity = 100;
+  SPOOL.setVelocity(string_velocity, percent);
+  Spool spool;
+  spool.d = &d;
+
   //core user input loop
   while (1) {
     //stop spinner
     SPIN.stop();
+
     //resets motor velocities
     d.reset();
 
@@ -187,6 +232,17 @@ void usercontrol(void) {
     d.horizontal(Controller1.ButtonL2.pressing(), Controller1.ButtonR2.pressing());
     //move based of sticks
     d.stickMove(Controller1.Axis3.position(), Controller1.Axis2.position());
+    
+    string_velocity=string_velocity+Controller1.ButtonUp.pressing()-Controller1.ButtonDown.pressing();
+    SPOOL.setVelocity(string_velocity, percent);
+
+    spool.unwind(Controller1.ButtonA.pressing());
+    spool.wind(Controller1.ButtonB.pressing());
+    spool.update();
+
+    Brain.Screen.clearLine();
+    Brain.Screen.print(string_velocity);
+
 
     //pointer to drivetrain
     Drivetrain* dr1 = &d;

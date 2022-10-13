@@ -9,6 +9,7 @@ extern motor LEFT_BK;
 extern motor RIGHT_FR;
 extern motor RIGHT_BK;
 extern motor SPIN;
+extern motor SPOOL;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

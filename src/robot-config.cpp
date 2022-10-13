@@ -14,6 +14,7 @@ motor LEFT_BK = motor(PORT19, ratio18_1, false);
 motor RIGHT_FR = motor(PORT10, ratio18_1, false);
 motor RIGHT_BK = motor(PORT18, ratio18_1, false);
 motor SPIN = motor(PORT12, ratio18_1, false);
+motor SPOOL = motor(PORT14, ratio18_1, false);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable
