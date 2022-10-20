@@ -15,7 +15,8 @@
 // LEFT_BK              motor         19              
 // RIGHT_FR             motor         10              
 // RIGHT_BK             motor         18              
-// SPIN                 motor         12              
+// SPIN                 motor         12  
+// Vision1              vision        6              
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
@@ -47,11 +48,25 @@ class Drivetrain {
   //bl = back left drivetrain moter power in %
 
   public: int fl;
-  public: int fr;
-  public: int bl;
-  public: int br;
-  public: bool sidewaysPressed;
+  int fr;
+  int bl;
+  int br;
+  bool sidewaysPressed;
+  bool slowed = false;
 
+
+
+
+
+  enum Horizontal {
+    Left,
+    Right,
+  };
+
+  bool ToggleSlow(){
+    slowed=!slowed;
+    return slowed;
+  }
 
   public: void horizontal(bool left, bool right){
  //move left
@@ -102,18 +117,35 @@ class Drivetrain {
   }
 
   public: void AutonomousDrive(float left, float right, double t){
+      this->reset();
       fl = left;
-      fl = left;
+      bl = left;
 
       br = right;
       fr = right;
       this->drive();
-
-     
+      wait(t, sec);
+      reset();
+      this->drive();
+      
+  }
+  public: void AutonomousHorizontal(Horizontal dir, double t){
+      this->reset();
+      this->horizontal(dir == Horizontal::Left, dir == Horizontal::Right);
+      this->drive();
+      wait(t, sec);
   }
   
   //spin drivetrain motors based of internal power variables
   public: void drive(){
+
+      if (slowed) {
+        fr*=0.5;
+        br*=0.5;
+    
+        fl*=0.5;
+        bl*=0.5;
+      }
       RIGHT_FR.setVelocity(-fr, percent);
       RIGHT_BK.setVelocity(-br, percent);
       LEFT_FR.setVelocity(fl, percent);
@@ -202,9 +234,15 @@ void autonomous(void) {
   SPIN.setVelocity(40, percent);
   Drivetrain d;
   d.reset();
-  d.AutonomousDrive(40, 40, 1);
-  SPINNER(true, forward, &d);
-  wait(0.3, sec);
+  d.AutonomousHorizontal(Drivetrain::Horizontal::Left, 0.45);
+  d.AutonomousDrive(-1, -1, 4);
+  d.AutonomousDrive(3, 3, 1);
+  SPINNER(true, reverse, &d);
+  d.drive();
+  wait(1, sec);
+  SPIN.stop();
+  d.reset();
+  d.drive();
 }
 
 void usercontrol(void) {
@@ -233,8 +271,8 @@ void usercontrol(void) {
     //move based of sticks
     d.stickMove(Controller1.Axis3.position(), Controller1.Axis2.position());
     
-    string_velocity=string_velocity+Controller1.ButtonUp.pressing()-Controller1.ButtonDown.pressing();
-    SPOOL.setVelocity(string_velocity, percent);
+    // string_velocity=string_velocity+Controller1.ButtonUp.pressing()-Controller1.ButtonDown.pressing();
+    // SPOOL.setVelocity(string_velocity, percent);
 
     spool.unwind(Controller1.ButtonA.pressing());
     spool.wind(Controller1.ButtonB.pressing());
@@ -250,7 +288,11 @@ void usercontrol(void) {
     SPINNER(Controller1.ButtonL1.pressing(), forward, dr1);
     SPINNER(Controller1.ButtonR1.pressing(), reverse, dr1);
     //send drivetrain velocities to motors
-    d.drive();
+    if (Controller1.ButtonDown.pressing()){
+      d.ToggleSlow();
+    }
+      d.drive();
+    
     wait(20, msec);
     }
 }
