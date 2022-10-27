@@ -239,7 +239,7 @@ void pre_auton(void) {
 //drives forward then suddely reverse to dump disks sitting on the front of the motor
 void dumpy(Drivetrain* d) {
   d->AutonomousDrive(100, 100, 2);
-  d->AutonomousDrive(-100, -100, 0.75);
+  d->AutonomousDrive(-100, -100, 2);
 
 
 }
@@ -263,6 +263,7 @@ void usercontrol(void) {
   SPOOL.setVelocity(100, percent);
   //create a spool object we call to later spin the upper wheel
   Spool spool;
+  spool.d = &d;
 
   //core user input loop
   while (1) {
@@ -276,16 +277,16 @@ void usercontrol(void) {
     //control left or right wheels based of respective sticks
     d.stickMove(Controller1.Axis3.position(), Controller1.Axis2.position());
   
-    //start continuously unwiding the spool if a is pressed
-    spool.unwind(Controller1.ButtonA.pressing());
     //stop unwinding and wind the spool while the "b" button is pressed
     spool.wind(Controller1.ButtonB.pressing());
+    //start continuously unwiding the spool if a is pressed
+    spool.unwind(Controller1.ButtonA.pressing());
     //run whatever code the spool is set to do
     spool.update();
 
     //basic print statement for debugging
-    //Brain.Screen.clearLine();
-    //Brain.Screen.print(string_velocity)
+    // Brain.Screen.clearLine();
+    // Brain.Screen.print(spool.spinning);
 
     //spin if a bumper is pressed
     SPINNER(Controller1.ButtonL1.pressing(), forward, &d);
