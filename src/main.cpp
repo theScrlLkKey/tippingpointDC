@@ -230,69 +230,74 @@ void pre_auton(void) {
   // Example: clearing encoders, setting servo positions, ...
 }
 
+// bool blueOnTop() {
+//   Vision1.takeSnapshot(Vision1__BLUE_V);
+//   Vision1.
+//   return true;
+// }
+
+//drives forward then suddely reverse to dump disks sitting on the front of the motor
+void dumpy(Drivetrain* d) {
+  d->AutonomousDrive(100, 100, 2);
+  d->AutonomousDrive(-100, -100, 0.75);
+
+
+}
+
 void autonomous(void) {
   SPIN.setVelocity(40, percent);
   Drivetrain d;
   d.reset();
-  d.AutonomousHorizontal(Drivetrain::Horizontal::Left, 0.45);
-  d.AutonomousDrive(-1, -1, 4);
-  d.AutonomousDrive(3, 3, 1);
-  SPINNER(true, reverse, &d);
-  d.drive();
-  wait(1, sec);
-  SPIN.stop();
+  dumpy(&d);
   d.reset();
   d.drive();
 }
 
 void usercontrol(void) {
-  //initalize drivetrain labeled as "d" and set velocities to 0
+  //create a drivetrain labeled as "d" and set velocities to 0.  This is used to call drivetrain movement later
   Drivetrain d;
   d.reset();
-  //set inital Spin power
+  //set Spin power for the rollers slow so mother doesnt slip
   SPIN.setVelocity(40, percent);
-
-
-  int string_velocity = 100;
-  SPOOL.setVelocity(string_velocity, percent);
+  //max the string release velocity so we release string as fast as possible
+  SPOOL.setVelocity(100, percent);
+  //create a spool object we call to later spin the upper wheel
   Spool spool;
-  spool.d = &d;
 
   //core user input loop
   while (1) {
     //stop spinner
     SPIN.stop();
-
     //resets motor velocities
     d.reset();
 
-    //strafe on triggers
+    //strafe if a trigger is pressed
     d.horizontal(Controller1.ButtonL2.pressing(), Controller1.ButtonR2.pressing());
-    //move based of sticks
+    //control left or right wheels based of respective sticks
     d.stickMove(Controller1.Axis3.position(), Controller1.Axis2.position());
-    
-    // string_velocity=string_velocity+Controller1.ButtonUp.pressing()-Controller1.ButtonDown.pressing();
-    // SPOOL.setVelocity(string_velocity, percent);
-
+  
+    //start continuously unwiding the spool if a is pressed
     spool.unwind(Controller1.ButtonA.pressing());
+    //stop unwinding and wind the spool while the "b" button is pressed
     spool.wind(Controller1.ButtonB.pressing());
+    //run whatever code the spool is set to do
     spool.update();
 
-    Brain.Screen.clearLine();
-    Brain.Screen.print(string_velocity);
+    //basic print statement for debugging
+    //Brain.Screen.clearLine();
+    //Brain.Screen.print(string_velocity)
 
+    //spin if a bumper is pressed
+    SPINNER(Controller1.ButtonL1.pressing(), forward, &d);
+    SPINNER(Controller1.ButtonR1.pressing(), reverse, &d);
 
-    //pointer to drivetrain
-    Drivetrain* dr1 = &d;
-    //spin based off bumpers
-    SPINNER(Controller1.ButtonL1.pressing(), forward, dr1);
-    SPINNER(Controller1.ButtonR1.pressing(), reverse, dr1);
-    //send drivetrain velocities to motors
+    //toggle speed between slow or fast if button down is pressed
     if (Controller1.ButtonDown.pressing()){
       d.ToggleSlow();
     }
+      //causes the drivetrain to execute the movement which was set above
       d.drive();
-    
+    //freeze coude for 20ms every loop to prevent the robot from overheating(motors still work, just no input)
     wait(20, msec);
     }
 }
