@@ -307,7 +307,7 @@ void usercontrol(void) {
 // Main will set up the competition functions and callbacks.
 //
 int main() {
-  // Set up callbacks for autonomous and driver control periods.
+  // Set up callbacks for autonomous and driver control periods. tt
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 
