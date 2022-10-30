@@ -240,10 +240,18 @@ void pre_auton(void) {
 void dumpy(Drivetrain* d) {
   d->AutonomousDrive(100, 100, 2);
   d->AutonomousDrive(-100, -100, 2);
-
-
 }
 
+int red_on_top() {
+    Vision1.takeSnapshot(Vision1__RED_V);
+    int red_height = Vision1.objects[0].centerY;
+    //Vision1.takeSnapshot(Vision1__BLUE_V);
+    int blue_height = Vision1.objects[0].centerY;
+    //l = Vision1__BLUE_V.
+    //Vision1
+    
+    return Vision1.objects[0].exists;
+}
 void autonomous(void) {
   SPIN.setVelocity(40, percent);
   Drivetrain d;
@@ -258,7 +266,7 @@ void usercontrol(void) {
   Drivetrain d;
   d.reset();
   //set Spin power for the rollers slow so mother doesnt slip
-  SPIN.setVelocity(40, percent);
+  SPIN.setVelocity(55, percent);
   //max the string release velocity so we release string as fast as possible
   SPOOL.setVelocity(100, percent);
   //create a spool object we call to later spin the upper wheel
@@ -285,8 +293,8 @@ void usercontrol(void) {
     spool.update();
 
     //basic print statement for debugging
-    // Brain.Screen.clearLine();
-    // Brain.Screen.print(spool.spinning);
+     Brain.Screen.clearLine();
+     Brain.Screen.print(red_on_top());
 
     //spin if a bumper is pressed
     SPINNER(Controller1.ButtonL1.pressing(), forward, &d);
@@ -307,7 +315,7 @@ void usercontrol(void) {
 // Main will set up the competition functions and callbacks.
 //
 int main() {
-  // Set up callbacks for autonomous and driver control periods. tt
+  // Set up callbacks for autonomous and driver control periods. 
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 

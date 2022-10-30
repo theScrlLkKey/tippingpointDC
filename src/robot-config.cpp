@@ -13,7 +13,7 @@ motor LEFT_FR = motor(PORT9, ratio18_1, false);
 motor LEFT_BK = motor(PORT19, ratio18_1, false);
 motor RIGHT_FR = motor(PORT10, ratio18_1, false);
 motor RIGHT_BK = motor(PORT18, ratio18_1, false);
-motor SPIN = motor(PORT12, ratio18_1, false);
+motor SPIN = motor(PORT12, ratio36_1, false);
 motor SPOOL = motor(PORT14, ratio18_1, false);
 /*vex-vision-config:begin*/
 signature Vision1__RED_V = signature (1, 8267, 10923, 9595, -1703, -673, -1188, 3, 0);
