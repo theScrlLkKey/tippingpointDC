@@ -9,12 +9,17 @@ brain  Brain;
 
 // VEXcode device constructors
 controller Controller1 = controller(primary);
-motor FRONT_LEFT = motor(PORT9, ratio18_1, false);
-motor FRONT_RIGHT = motor(PORT10, ratio18_1, true);
-motor BACK_LEFT = motor(PORT19, ratio18_1, false);
-motor BACK_RIGHT = motor(PORT18, ratio18_1, true);
-motor ROLLER_SPINNER = motor(PORT12, ratio36_1, false);
+motor LEFT_FR = motor(PORT9, ratio18_1, false);
+motor LEFT_BK = motor(PORT19, ratio18_1, false);
+motor RIGHT_FR = motor(PORT10, ratio18_1, false);
+motor RIGHT_BK = motor(PORT18, ratio18_1, false);
+motor SPIN = motor(PORT12, ratio36_1, false);
 motor SPOOL = motor(PORT14, ratio18_1, false);
+/*vex-vision-config:begin*/
+signature Vision1__RED_V = signature (1, 8267, 10923, 9595, -1703, -673, -1188, 3, 0);
+signature Vision1__BLUE_V = signature (2, -3077, -1701, -2389, 8815, 14125, 11470, 2.5, 0);
+vision Vision1 = vision (PORT1, 50, Vision1__RED_V, Vision1__BLUE_V);
+/*vex-vision-config:end*/
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable
