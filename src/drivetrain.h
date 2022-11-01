@@ -1,3 +1,5 @@
+#ifndef DRIVETRAIN_INCLUDED
+#define DRIVETRAIN_INCLUDED
 #include "vex.h"
 using namespace vex;
 
@@ -6,10 +8,10 @@ class Drivetrain {
 public:
   // abstraction towards direction, used as a paramenter when moving
   // horizontally
-  enum HorizontalDir {
+enum HorizontalDir {
     Left,
     Right,
-  };
+};
 
 protected:
   // array of the 4 motors in the drivetrain
@@ -155,3 +157,4 @@ public:
     this->stop();
   }
 };
+#endif

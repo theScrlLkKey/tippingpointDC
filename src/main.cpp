@@ -1,6 +1,18 @@
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
+// Controller1          controller                    
+// FRONT_LEFT           motor         9               
+// FRONT_RIGHT          motor         10              
+// BACK_LEFT            motor         19              
+// BACK_RIGHT           motor         18              
+// ROLLER_SPINNER       motor         12              
+// SPOOL                motor         14              
+// VISION_SENSOR        vision        6               
+// ---- END VEXCODE CONFIGURED DEVICES ----
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
 // Controller1          controller
 // FRONT_LEFT           motor         9
 // FRONT_RIGHT          motor         10
@@ -8,6 +20,7 @@
 // BACK_RIGHT           motor         18
 // ROLLER_SPINNER       motor         12
 // SPOOL                motor         14
+// VISION_SENSOR        vision        6
 // ---- END VEXCODE CONFIGURED DEVICES ----
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
@@ -17,44 +30,28 @@
 /*    Description:  spin up                                                   */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
+#define COLOR TeamColor::Blue
 
 #include "vex.h"
-#include <math.h>
 
-#ifndef DRIVETRAIN_INCLUDED
-#define DRIVETRAIN_INCLUDED
 #include "drivetrain.h"
-#endif
-
-#ifndef SPOOL_INCLUDED
-#define SPOOL_INCLUDED
-#include "spool.h"
-#endif
-
-#ifndef ROLLER_INCLUDED
-#define ROLLER_INCLUDED
 #include "rollerSpinner.h"
-#endif
+#include "spool.h"
+#include "vision.h"
+
 
 using namespace vex;
 
 competition Competition;
 
-// void SPINNER(bool rotate, directionType dir, Drivetrain *dr) {
-//   if (rotate) {
-//     // drive backwords to apply force
-//     dr->fr = -2;
-//     dr->br = -2;
-
-//     dr->fl = -8;
-//     dr->bl = -8;
-//     ROLLER_SPINNER.spin(dir);
-//   }
-// }
-
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
+  if (COLOR == TeamColor::Red) {
+    VISION_SENSOR.setLedColor(255, 0, 0);
+  } else if (COLOR == TeamColor::Blue) {
+    VISION_SENSOR.setLedColor(0, 0, 255);
+  }
 }
 // drives forward then suddely reverse to dump disks sitting on the front of the
 // motor
@@ -82,14 +79,20 @@ void usercontrol(void) {
   // inititalize spool with velocity 100
   Spool spool = Spool(&SPOOL, 100, &drive);
 
+  Vision vision = Vision(&VISION_SENSOR, COLOR);
+
   // core user input loop
   while (1) {
+    Controller1.Screen.clearScreen();
+    Controller1.Screen.newLine();
+    Controller1.Screen.print(vision.red_on_top());
+    // vision.rolor_state();
     // control left or right wheels based of respective sticks and straife if a
     // trigger is pressed
     drive.userControl(
         Controller1.Axis3.position(), Controller1.Axis2.position(),
         Controller1.ButtonL2.pressing(), Controller1.ButtonR2.pressing());
-
+ 
     // continuously unwind the spool when a is pressed and wind the spool while
     // b is pressed
     spool.update(Controller1.ButtonA.pressing(),

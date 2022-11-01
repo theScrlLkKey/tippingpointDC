@@ -1,7 +1,6 @@
-#ifndef DRIVETRAIN_INCLUDED
-#define DRIVETRAIN_INCLUDED
+#ifndef ROLLER_INCLUDED
+#define ROLLER_INCLUDED
 #include "drivetrain.h"
-#endif
 using namespace vex;
 
 class RollerSpinner {
@@ -12,11 +11,11 @@ private:
 
 //constructor of roller spinner class
 public:
-  RollerSpinner(motor *spinner_motor, double velocity, Drivetrain *drivetrain) {
-    spinner = spinner_motor;
+  RollerSpinner(motor *spinner_, double velocity, Drivetrain *drive_) {
+    spinner = spinner_;
     spinner->setVelocity(velocity, percent);
     spinner->setStopping(coast);
-    drive = drivetrain;
+    drive = drive_;
   }
 
 //spins the wheel either forward or reverse.  If the wheel is spining also slightly drive backwards to apply pressure on the wheel.
@@ -40,3 +39,4 @@ public:
     }
   }
 };
+#endif

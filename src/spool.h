@@ -1,7 +1,6 @@
-#ifndef DRIVETRAIN_INCLUDED
-#define DRIVETRAIN_INCLUDED
+#ifndef SPOOL_INCLUDED
+#define SPOOL_INCLUDED
 #include "drivetrain.h"
-#endif
 #include "vex.h"
 
 using namespace vex;
@@ -62,3 +61,4 @@ public:
   //   }
   // }
 };
+#endif
